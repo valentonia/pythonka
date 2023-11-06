@@ -25,8 +25,8 @@ def button_equal():
     e.delete(0, END)
     e.insert(0, f_num + int(second_number))
 
-button_1 = Button(root, text="1", padx=40, pady = 20, command=lambda: button_click(1))
-button_2 = Button(root, text="2", padx=40, pady = 20, command=lambda: button_click(2))
+button_1 = Button(root, text="1", padx=40, pady = 20, command=lambda:button_click(1))
+button_2 = Button(root, text="2", padx=40, pady = 20, command=lambda:button_click(2))
 button_3 = Button(root, text="3", padx=40, pady = 20, command=lambda:button_click(3))
 button_4 = Button(root, text="4", padx=40, pady = 20, command=lambda:button_click(4))
 button_5 = Button(root, text="5", padx=40, pady = 20, command=lambda:button_click(5))
