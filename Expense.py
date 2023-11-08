@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import random
+
+pastel_colors = ['#f0a3a3', '#FFCC99', '#99FF99', '#66B2FF', '#C2C2F0', '#FF99CC', '#99CCFF']
 
 class IncomeExpenseTracker:
     
@@ -77,6 +80,7 @@ class IncomeExpenseTracker:
 
     def show_pie_chart(self):
         category_expenses = {}
+        pastel_palette = random.sample(pastel_colors, len(self.expense_categories))
 
         for expense in self.expenses:
             category = expense.category
@@ -90,9 +94,14 @@ class IncomeExpenseTracker:
         if category_expenses:
             fig = Figure(figsize=(6, 6))
             ax = fig.add_subplot(111)
+
             labels = category_expenses.keys()
             sizes = category_expenses.values()
-            ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+
+            # Use pastel colors for the pie chart
+            colors = pastel_palette[:len(labels)]
+
+            ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=colors)
             ax.set_title('Expense Categories')
 
             pie_chart = FigureCanvasTkAgg(fig, self.root)
