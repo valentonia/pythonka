@@ -1,116 +1,110 @@
-from tkinter import *
+import tkinter as tk
+from tkinter import ttk
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-class IncomeWindow:
-    def __init__(self):
-        root = Tk()
-        root.title("Income and Expenses")
-
-        self.e = Entry(root, width = 35, borderwidth=5)
-        self.e.grid(row = 0, column = 0, columnspan=1, padx = 10, pady = 10)
-
-        self.b = Button(root, text = "Save", command=self.button_save)
-        self.b.grid(row = 1, column = 0, padx=10)
-
-        root.mainloop()
+class IncomeExpenseTracker:
     
-    def button_save(self):
-        global income_l
-                
-        value = self.e.get()
-        self.e.delete(0, END)
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Income and Expenses")
+        self.expenses = []
         
-        old_value = income_l.cget("text")
-        value = str(int(value) + int(old_value))
-        
-        income_l.config(text=value)
-        
-    def get_value(self):
-        text = self.e.get()
-        print(text)
+        # Create a button to show the pie chart
+        self.pie_chart_button = tk.Button(self.root, text="Show Pie Chart", command=self.show_pie_chart)
+        self.pie_chart_button.grid(row=7, column=1)
 
-class ExpenseWindow:
-    def __init__(self):
-        root = Tk()
-        root.title("Income and Expenses")
+        # Income Entry
+        self.income_label = tk.Label(self.root, text="Income:")
+        self.income_label.grid(row=0, column=0)
+        self.income_entry = tk.Entry(self.root, width=15, borderwidth=5)
+        self.income_entry.grid(row=0, column=1, padx=10, pady=10)
+        self.income_button = tk.Button(self.root, text="Save Income", command=self.save_income)
+        self.income_button.grid(row=0, column=2)
 
-        self.e = Entry(root, width = 35, borderwidth=5)
-        self.e.grid(row = 0, column = 0, columnspan=3, padx = 10, pady = 10)
-                
-        button_1 = Button(root, text="1", padx=40, pady = 20, command=lambda:self.button_click(1))
-        button_2 = Button(root, text="2", padx=40, pady = 20, command=lambda:self.button_click(2))
-        button_3 = Button(root, text="3", padx=40, pady = 20, command=lambda:self.button_click(3))
-        button_4 = Button(root, text="4", padx=40, pady = 20, command=lambda:self.button_click(4))
-        button_5 = Button(root, text="5", padx=40, pady = 20, command=lambda:self.button_click(5))
-        button_6 = Button(root, text="6", padx=40, pady = 20, command=lambda:self.button_click(6))
-        button_7 = Button(root, text="7", padx=40, pady = 20, command=lambda:self.button_click(7))
-        button_8 = Button(root, text="8", padx=40, pady = 20, command=lambda:self.button_click(8))
-        button_9 = Button(root, text="9", padx=40, pady = 20, command=lambda:self.button_click(9))
-        button_0 = Button(root, text="0", padx=40, pady = 20, command=lambda:self.button_click(0))
-        button_add = Button(root, text="+", padx=39,pady=20,command=self.button_add)
-        button_equal = Button(root, text="=", padx=91,pady=20,command=self.button_equal)
-        button_save = Button(root, text="Save", padx=79,pady=20,command=self.button_save)
+        # Expense Category Combobox
+        self.expense_category_label = tk.Label(self.root, text="Select Category:")
+        self.expense_category_label.grid(row=2, column=0)
+        self.expense_categories = ['Fashion', 'Traveling', 'Food', 'Hospitality', 'Utility bills','Selfcare','Emergency']
+        self.selected_category = tk.StringVar()
+        self.expense_category_combobox = ttk.Combobox(self.root, textvariable=self.selected_category, values=self.expense_categories)
+        self.expense_category_combobox.grid(row=2, column=1, padx=10, pady=10)
 
-        button_1.grid(row=3, column = 0)
-        button_2.grid(row=3, column = 1)
-        button_3.grid(row=3, column = 2)
+        # Expense Amount Entry
+        self.expense_amount_label = tk.Label(self.root, text="Expense Amount:")
+        self.expense_amount_label.grid(row=3, column=0)
+        self.expense_amount_entry = tk.Entry(self.root, width=15, borderwidth=5)
+        self.expense_amount_entry.grid(row=3, column=1, padx=10, pady=10)
 
-        button_4.grid(row=2, column = 0)
-        button_5.grid(row=2, column = 1)
-        button_6.grid(row=2, column = 2)
+        # Save Expense Category Button
+        self.save_expense_category_button = tk.Button(self.root, text="Save Expense Category", command=self.save_expense_category)
+        self.save_expense_category_button.grid(row=3, column=2)
 
-        button_7.grid(row=1, column = 0)
-        button_8.grid(row=1, column = 1)
-        button_9.grid(row=1, column = 2)
+        # Track Total Income and Expenses
+        self.income_total_label = tk.Label(self.root, text="Total Income:")
+        self.income_total_label.grid(row=5, column=0)
+        self.income_total = 0
+        self.income_total_display = tk.Label(self.root, text=str(self.income_total))
+        self.income_total_display.grid(row=5, column=1)
 
-        button_0.grid(row=4, column = 0)
-        button_save.grid(row=4, column=1,columnspan=2)
-        button_add.grid(row=5, column=0)
-        button_equal.grid(row=5,column=1,columnspan=2)
-                
-        root.mainloop()
-        
-    def button_click(self,number):
-        current = self.e.get()
-        self.e.delete(0, END)
-        self.e.insert(0,str(current) + str(number))
+        self.expense_total_label = tk.Label(self.root, text="Total Expenses:")
+        self.expense_total_label.grid(row=6, column=0)
+        self.expense_total = 0
+        self.expense_total_display = tk.Label(self.root, text=str(self.expense_total))
+        self.expense_total_display.grid(row=6, column=1)
 
-    def button_save(self):
-        global expense_l
-                
-        value = self.e.get()
-        self.e.delete(0, END)
-        
-        old_value = expense_l.cget("text")
-        value = str(int(value) + int(old_value))
-        
-        expense_l.config(text=value)
-        
-    def button_add(self):
-        first_number = self.e.get()
-        global f_num 
-        f_num = int(first_number)
-        self.e.delete(0, END)
+    def save_income(self):
+        income = self.income_entry.get()
+        try:
+            income = float(income)
+            self.income_total += income
+            self.income_total_display.config(text=str(self.income_total))
+            self.income_entry.delete(0, tk.END)
+        except ValueError:
+            pass
 
-    def button_equal(self):
-        second_number = self.e.get()
-        self.e.delete(0, END)
-        self.e.insert(0, f_num + int(second_number))
+    def save_expense_category(self):
+        category = self.selected_category.get()
+        amount = self.expense_amount_entry.get()
+        try:
+            amount = float(amount)
+            self.expense_total += amount
+            self.expense_total_display.config(text=str(self.expense_total))
+            self.expense_amount_entry.delete(0, tk.END)
+            self.expenses.append(Expense(category, amount))  # Add the expense object to the list
+        except ValueError:
+            pass
 
-root = Tk()
-root.title("Income and Expense")
+    def show_pie_chart(self):
+        category_expenses = {}
 
-expense_b = Button(root, text = "Expense", command=ExpenseWindow)
-income_b = Button(root, text = "Income", command=IncomeWindow)
+        for expense in self.expenses:
+            category = expense.category
+            amount = expense.amount
 
+            if category not in category_expenses:
+                category_expenses[category] = 0
 
+            category_expenses[category] += amount
 
-expense_l = Label(root, text="0")
-expense_l.grid(row=2)
+        if category_expenses:
+            fig = Figure(figsize=(6, 6))
+            ax = fig.add_subplot(111)
+            labels = category_expenses.keys()
+            sizes = category_expenses.values()
+            ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+            ax.set_title('Expense Categories')
 
-income_l = Label(root, text="0")
-income_l.grid(row=2, column=1)
+            pie_chart = FigureCanvasTkAgg(fig, self.root)
+            pie_chart.get_tk_widget().grid(row=8, column=1)
+            pie_chart.draw()
 
+class Expense:
+    def __init__(self, category, amount):
+        self.category = category
+        self.amount = amount
 
-expense_b.grid(row = 1, column = 0,padx = 15)
-income_b.grid(row = 1, column = 1, padx = 15)
-root.mainloop()
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = IncomeExpenseTracker(root)
+    root.mainloop()
