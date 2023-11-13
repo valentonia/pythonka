@@ -21,7 +21,7 @@ class IncomeExpenseTracker:
         self.income_label = tk.Label(self.root, text="Income:")
         self.income_label.grid(row=0, column=0)
         self.income_entry = tk.Entry(self.root, width=15, borderwidth=5)
-        self.income_entry.grid(row=0, column=1, padx=10, pady=10)
+        self.income_entry.grid(row=0, column=1, padx=20, pady=10)
         self.income_button = tk.Button(self.root, text="Save Income", command=self.save_income)
         self.income_button.grid(row=0, column=2)
 
@@ -63,20 +63,38 @@ class IncomeExpenseTracker:
             self.income_total += income
             self.income_total_display.config(text=str(self.income_total))
             self.income_entry.delete(0, tk.END)
+
         except ValueError:
             pass
+
 
     def save_expense_category(self):
         category = self.selected_category.get()
         amount = self.expense_amount_entry.get()
         try:
             amount = float(amount)
+
+            # Check if adding the new expense exceeds the total income
+            if self.expense_total + amount > self.income_total:
+                # Display a message in red text
+                self.expense_total_display.config(text=str(self.expense_total), fg='red')
+                out_of_budget_label = tk.Label(self.root, text="You are out of budget, please try again", fg='red')
+                out_of_budget_label.grid(row=9, column=1)
+                return
+
+            # Reset the out of budget label if it was previously shown
+            out_of_budget_label = tk.Label(self.root, text="")
+            out_of_budget_label.grid(row=9, column=1)
+
+            # Update the expense total and display
             self.expense_total += amount
             self.expense_total_display.config(text=str(self.expense_total))
             self.expense_amount_entry.delete(0, tk.END)
             self.expenses.append(Expense(category, amount))  # Add the expense object to the list
+
         except ValueError:
             pass
+
 
     def show_pie_chart(self):
         category_expenses = {}
